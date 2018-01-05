@@ -223,5 +223,158 @@ public class KafkaCustomerConsumer {
 	}
 }
 
+package uk.sk.kafka.messaging.KafkaSample.CustomerConsumer.controllers;
 
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import uk.sk.kafka.messaging.KafkaSample.CustomerConsumer.pojos.Subscriber;
+
+@RestController
+public class RestEndPoints {
+	Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Autowired private Subscriber subscribers;
+	
+	@RequestMapping(method= {RequestMethod.GET})
+	public ResponseEntity<?> ping() {
+		return new ResponseEntity<String>("Success", HttpStatus.OK);
+	}
+	
+	@RequestMapping(method= {RequestMethod.GET}, path="/cust/subscribe")
+	public ResponseEntity<?> getSubscribers() {
+		return new ResponseEntity<Set<String>>(subscribers.getSubscribers(), HttpStatus.OK);
+	}
+	
+	@RequestMapping(method= {RequestMethod.PUT}, path="/cust/subscribe")
+	public ResponseEntity<?> addSubscriber(@RequestParam(name="url") String url) {
+		logger.info("Customer consumer [add - subscriber] request for: "+ url +", Received ");
+		subscribers.addSubscriber(url);
+		return new ResponseEntity<String>("Success", HttpStatus.ACCEPTED);
+	}
+	
+	@RequestMapping(method= {RequestMethod.DELETE}, path="/app/subscribe")
+	public ResponseEntity<?> removeSubscriber(@RequestParam(name="url") String url) {
+		logger.info("Customer consumer [remove - subscription] request for: "+ url +", Received ");
+		subscribers.removeSubscriber(url);
+		return new ResponseEntity<String>("Success", HttpStatus.ACCEPTED);
+	}
+}
+
+
+
+package uk.sk.kafka.messaging.KafkaSample.CustomerConsumer.pojos;
+
+public class Customer {
+	private Long id;
+	private String firstName;
+	private String lastName;
+	private String emailAddress;
+	private String addressLine1;
+	private String addressLine2;
+	private String city;
+	private String postalCode;
+	private String phoneNumber;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
+	}
+	public String getAddressLine1() {
+		return addressLine1;
+	}
+	public void setAddressLine1(String addressLine1) {
+		this.addressLine1 = addressLine1;
+	}
+	public String getAddressLine2() {
+		return addressLine2;
+	}
+	public void setAddressLine2(String addressLine2) {
+		this.addressLine2 = addressLine2;
+	}
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getPostalCode() {
+		return postalCode;
+	}
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+	@Override
+	public String toString() {
+		return "Customer [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", emailAddress="
+				+ emailAddress + ", addressLine1=" + addressLine1 + ", addressLine2=" + addressLine2 + ", city=" + city
+				+ ", postalCode=" + postalCode + ", phoneNumber=" + phoneNumber + "]";
+	}	
+}
+
+
+
+package uk.sk.kafka.messaging.KafkaSample.CustomerConsumer.pojos;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+public class Subscriber {
+	private Set<String> subscribers = new LinkedHashSet<>();
+	
+	public Set<String> getSubscribers() {
+		return subscribers;
+	}
+
+	public void addSubscriber(String url) {
+		subscribers.add(url);
+	}
+	
+	public void removeSubscriber(String url) {
+		subscribers.remove(url);		
+	}
+}
+
+============ application.properties
+
+server.port=9204
+server.context-path=/kcc
+kafka.bootstrapAddress=localhost:9092
+message.topic.name=CUSTOMER
+kafka.groupid=HE_COMMON
+backoff.policy.strategy=EB
 
